@@ -15,6 +15,8 @@ AI（Claude Code など）が SKILL.md の手順に従って使う。人が直�
       台帳に入れない写真を receipts/重複/ か receipts/対象外/ へ移す。
   python3 kakeibo.py next-id <YYYY-MM-DD>
       その日の次のレシートID（RCPT-YYYYMMDD-NNN）を表示する。
+  python3 kakeibo.py facts [YYYY-MM]
+      家計の見直しに使う事実（月の合計・先月との差・多いカテゴリー・よく行くお店・予算）を表示する。
   python3 kakeibo.py export
       台帳と予算から kakeibo_summary.json を作り、受信箱へ書き出す（アプリの「お金の状況」に出る）。
 
@@ -40,6 +42,7 @@ DATA_DIR = Path(os.environ.get("KAKEIBO_DIR", Path.home() / "Documents" / "家�
 LEDGER = DATA_DIR / "台帳.csv"
 BUDGET = DATA_DIR / "budget.json"
 CONFIG = DATA_DIR / "config.json"
+REVIEW = DATA_DIR / "review.json"
 TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
 
 MOBILE_DOCUMENTS = Path.home() / "Library" / "Mobile Documents"
@@ -351,6 +354,12 @@ def cmd_export() -> None:
         "categories": build_categories(rows, current),
         "ledger": ledger,
     }
+    if REVIEW.exists():
+        # AI が書いた家計の見直し（{"month": "YYYY-MM", "text": "..."}）。アプリの「見直し」タブに出る
+        review = json.loads(REVIEW.read_text(encoding="utf-8"))
+        if review.get("month") and review.get("text"):
+            summary["review"] = {"month": review["month"], "text": review["text"],
+                                 "writtenAt": review.get("writtenAt") or datetime.now(JST).isoformat(timespec="seconds")}
     text = json.dumps(summary, ensure_ascii=False, separators=(",", ":"))
     written = 0
     for name, folder, _ in inboxes():
@@ -371,10 +380,39 @@ def cmd_export() -> None:
         print("受信箱が1つも無いので、アプリには届いていません。iPhone のアプリで1枚撮ると受信箱ができます。")
 
 
+def cmd_facts(month: str | None = None) -> None:
+    require_data_dir()
+    rows = read_ledger()
+    receipts = build_receipts(rows)
+    month = month or datetime.now(JST).strftime("%Y-%m")
+    months = sorted({r["date"][:7] for r in receipts})
+    previous = max((m for m in months if m < month), default=None)
+    def total(m): return sum(r["total"] for r in receipts if r["date"].startswith(m))
+    def cats(m): return {c["name"]: c["amount"] for c in build_categories(rows, m) if c["name"] != "消費税・値引き"}
+    now_cats = cats(month)
+    print(f"{month} 記録した支出 {total(month):,}円（レシート {len([r for r in receipts if r['date'].startswith(month)])}件）")
+    if previous:
+        print(f"{previous} は {total(previous):,}円（差 {total(month) - total(previous):+,}円）")
+        before = cats(previous)
+        for name in sorted(set(now_cats) | set(before), key=lambda n: -abs(now_cats.get(n, 0) - before.get(n, 0)))[:5]:
+            print(f"  {name}: {before.get(name, 0):,}円 → {now_cats.get(name, 0):,}円（{now_cats.get(name, 0) - before.get(name, 0):+,}円）")
+    print("多いカテゴリー: " + "、".join(f"{k} {v:,}円" for k, v in sorted(now_cats.items(), key=lambda kv: -kv[1])[:5]))
+    stores: dict[str, list[int]] = defaultdict(list)
+    for r in receipts:
+        if r["date"].startswith(month):
+            stores[r["store"].split(" ")[0]].append(r["total"])
+    print("よく行くお店: " + "、".join(f"{k} {len(v)}回 {sum(v):,}円" for k, v in sorted(stores.items(), key=lambda kv: -sum(kv[1]))[:5]))
+    budget = json.loads(BUDGET.read_text(encoding="utf-8")) if BUDGET.exists() else {}
+    for m in build_months(budget, receipts, month):
+        if m["month"] == month:
+            print(f"予算 {m['budget']:,}円 / 使った {m['spent']:,}円 / 残り {m['balance']:,}円")
+
+
 def main() -> None:
     args = sys.argv[1:]
     commands = {
         ("init", 0): cmd_init, ("where", 0): cmd_where, ("list", 0): cmd_list, ("export", 0): cmd_export,
+        ("facts", 0): cmd_facts, ("facts", 1): cmd_facts,
         ("archive", 2): cmd_archive, ("set-aside", 2): cmd_set_aside, ("next-id", 1): cmd_next_id,
     }
     command = commands.get((args[0], len(args) - 1)) if args else None
