@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>家計簿カメラ｜あなたの AI で読む家計簿</title>
+<meta name="description" content="iPhone でレシートを撮るだけ。あなたの Mac の AI（Claude Code など）が品目・値引き・消費税まで読んで家計簿をつけます。データはあなたの iCloud にだけ。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<h1>家計簿カメラ</h1>
+<p class="lead">iPhone でレシートを撮るだけ。あなたの Mac の AI（Claude Code など）が、品目・値引き・消費税まで読んで家計簿をつけます。</p>
+
+<h2>しくみ</h2>
+<ol>
+<li>アプリでレシートを撮ると、写真があなたの iCloud Drive に入ります。</li>
+<li>あなたの Mac の AI が、<a href="https://github.com/hey-show123/kakeibo-camera">読み取りの手順（skill）</a>に従って写真を読み、台帳（CSV）に1品ずつ記帳します。</li>
+<li>記帳した数字が iCloud 経由でアプリに届き、カレンダー・グラフ・予算として出ます。</li>
+</ol>
+<p>データはあなたの iCloud と Mac にだけ保存されます。アプリの運営者のサーバーはなく、アカウント登録も要りません。</p>
+
+<h2>用意するもの</h2>
+<ul>
+<li>iPhone（iOS 17 以上）と、同じ Apple ID の Mac。両方で iCloud Drive をオン</li>
+<li>Mac で使える AI（Claude Code がおすすめ。Codex など AGENTS.md を読むものでも可）</li>
+</ul>
+<p>Mac や AI が無い場合、撮った写真は iCloud に保存されますが、記帳はされません。</p>
+
+<h2>Mac の準備（Claude Code）</h2>
+<p>ターミナルで1行打ってから、Claude Code に「家計簿カメラの準備をして」と言います。</p>
+<pre>git clone https://github.com/hey-show123/kakeibo-camera.git ~/.claude/skills/kakeibo-camera</pre>
+<p>あとは iPhone で撮って、Mac の AI に「レシート読んで」と言うだけです。毎晩自動で読ませる方法は <a href="https://github.com/hey-show123/kakeibo-camera#readme">README</a> にあります。</p>
+
+<h2>料金</h2>
+<ul>
+<li>無料：レシートを撮る・今月のレシートの一覧と合計</li>
+<li>プレミアム：カレンダー・グラフ・収支・予算の「あと使える額」・過去の月<br>月額200円／年額1,500円／買い切り3,000円（税込）</li>
+</ul>
+<p>月額・年額は、期間の終わる24時間前までに解約しない限り自動で更新されます。解約は iPhone の「設定」→ Apple ID →「サブスクリプション」から。</p>
+
+<h2>サポート・お問い合わせ</h2>
+<p>不具合・ご要望・ご質問は、<a href="https://github.com/hey-show123/kakeibo-camera/issues">GitHub の Issues</a> へお寄せください（GitHub のアカウントが要ります）。</p>
+<h3>よくある質問</h3>
+<dl>
+<dt>撮ったのにアプリに出ない</dt>
+<dd>記帳は Mac の AI が行います。Mac の AI に「レシート読んで」と言うか、毎晩自動で読む予定を入れてください。アプリの下の表示が「Mac の AI が読むのを待っています」なら、写真は iCloud に届いています。</dd>
+<dt>「iCloud Drive につながっていません」と出る</dt>
+<dd>iPhone の「設定」→ Apple ID → iCloud で、iCloud Drive をオンにしてください。撮った写真は iPhone に保存してあり、つながると送ります。</dd>
+<dt>読み取りが間違っていた</dt>
+<dd>Mac の AI に「〇日の〇〇のレシートを直して」と頼んでください。台帳はふつうの CSV なので、Numbers や Excel でも直せます。</dd>
+<dt>長いレシートは？</dt>
+<dd>スキャナーで上から順に何ページかに分けて撮ると、AI が1枚のレシートとしてまとめます。</dd>
+<dt>家族の iPhone からも送りたい</dt>
+<dd>iCloud Drive の共有フォルダを使います。手順は <a href="https://github.com/hey-show123/kakeibo-camera/blob/main/SKILL.md">SKILL.md</a> の「家族の iPhone からも送るとき」。</dd>
+<dt>機種変更したら？</dt>
+<dd>同じ Apple ID なら、写真も数字も iCloud からそのまま届きます。プレミアムは「設定」→「購入を復元」で戻ります。</dd>
+</dl>
+
+<p class="links"><a href="terms.html">利用規約</a>　<a href="privacy.html">プライバシーポリシー</a></p>
+<p class="small">運営：山﨑 祥平</p>
+</main>
+</body>
+</html>
