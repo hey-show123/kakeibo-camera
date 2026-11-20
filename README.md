@@ -21,7 +21,7 @@ iPhone で撮る ─▶ iCloud Drive の受信箱 ─▶ Mac の AI が読んで
 | AI | 画像を読めて、Mac のファイルを扱えるもの。おすすめは [Claude Code](https://claude.com/claude-code)。Codex など AGENTS.md を読むものでも動きます |
 | Python 3 | Mac に入っているもので動きます（追加の部品は要りません） |
 
-Mac や AI が無い場合、アプリはレシートを撮って iCloud に保存するところまではできますが、**記帳はされません**（写真が受信箱にたまるだけです）。
+Mac や AI が無い場合は、アプリの「この iPhone だけで読む」を選びます。iPhone の中（Vision の文字の読み取りと Apple Intelligence）で**日付・合計・店名・支払方法**を読みます。品目までは読みません。写真は iCloud に残るので、あとで Mac の AI を使い始めれば、品目まで読み直せます。
 
 ## 入れ方（Claude Code）
 
